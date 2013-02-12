@@ -43,21 +43,22 @@
 #include "rtp.h"
 
 struct rtp_server *
-rtp_server_new(const char *name, rtp_type_t codec, int loop)
-{
+rtp_server_new(const char *name, rtp_type_t codec, int loop) {
     struct rtp_server *rp;
     int fd;
     char path[PATH_MAX + 1];
 
     sprintf(path, "%s.%d", name, codec);
     fd = open(path, O_RDONLY);
+
     if (fd == -1)
-	return NULL;
+        return NULL;
 
     rp = malloc(sizeof(*rp));
+
     if (rp == NULL) {
-	close(fd);
-	return NULL;
+        close(fd);
+        return NULL;
     }
 
     memset(rp, 0, sizeof(*rp));
@@ -96,64 +97,66 @@ rtp_server_get(struct rtp_server *rp, double dtime)
     int rlen, rticks, bytes_per_frame, ticks_per_frame, number_of_frames;
 
     if (rp->btime == -1)
-	rp->btime = dtime;
+        rp->btime = dtime;
 
     ts = ntohl(rp->rtp->ts);
 
     if (rp->btime + ((double)ts / RTPS_SRATE) > dtime)
-	return RTPS_LATER;
+        return RTPS_LATER;
 
     switch (rp->rtp->pt) {
-    case RTP_PCMU:
-    case RTP_PCMA:
-	bytes_per_frame = 8;
-	ticks_per_frame = 1;
-	break;
+        case RTP_PCMU:
+        case RTP_PCMA:
+            bytes_per_frame = 8;
+            ticks_per_frame = 1;
+            break;
 
-    case RTP_G729:
-	/* 10 ms per 8 kbps G.729 frame */
-	bytes_per_frame = 10;
-	ticks_per_frame = 10;
-	break;
+        case RTP_G729:
+            /* 10 ms per 8 kbps G.729 frame */
+            bytes_per_frame = 10;
+            ticks_per_frame = 10;
+            break;
 
-    case RTP_G723:
-	/* 30 ms per 6.3 kbps G.723 frame */
-	bytes_per_frame = 24;
-	ticks_per_frame = 30;
-	break;
+        case RTP_G723:
+            /* 30 ms per 6.3 kbps G.723 frame */
+            bytes_per_frame = 24;
+            ticks_per_frame = 30;
+            break;
 
-    case RTP_GSM:
-	/* 20 ms per 13 kbps GSM frame */
-	bytes_per_frame = 33;
-	ticks_per_frame = 20;
-	break;
+        case RTP_GSM:
+            /* 20 ms per 13 kbps GSM frame */
+            bytes_per_frame = 33;
+            ticks_per_frame = 20;
+            break;
 
-    case RTP_G722:
-	bytes_per_frame = 8;
-	ticks_per_frame = 1;
-	break;
+        case RTP_G722:
+            bytes_per_frame = 8;
+            ticks_per_frame = 1;
+            break;
 
-    default:
-	return RTPS_ERROR;
+        default:
+            return RTPS_ERROR;
     }
 
     number_of_frames = RTPS_TICKS_MIN / ticks_per_frame;
+
     if (RTPS_TICKS_MIN % ticks_per_frame != 0)
-	number_of_frames++;
+        number_of_frames++;
 
     rlen = bytes_per_frame * number_of_frames;
     rticks = ticks_per_frame * number_of_frames;
 
     if (read(rp->fd, rp->pload, rlen) != rlen) {
-	if (rp->loop == 0 || lseek(rp->fd, 0, SEEK_SET) == -1 ||
-	  read(rp->fd, rp->pload, rlen) != rlen)
-	    return RTPS_EOF;
-	if (rp->loop != -1)
-	    rp->loop -= 1;
+        if (rp->loop == 0 || lseek(rp->fd, 0, SEEK_SET) == -1 ||
+                read(rp->fd, rp->pload, rlen) != rlen)
+            return RTPS_EOF;
+
+        if (rp->loop != -1)
+            rp->loop -= 1;
     }
 
     if (rp->rtp->m != 0 && ntohs(rp->rtp->seq) != 0) {
-	rp->rtp->m = 0;
+        rp->rtp->m = 0;
     }
 
     rp->rtp->ts = htonl(ts + (RTPS_SRATE * rticks / 1000));
@@ -167,12 +170,12 @@ append_server(struct cfg *cf, struct rtpp_session *sp)
 {
 
     if (sp->rtps[0] != NULL || sp->rtps[1] != NULL) {
-	if (sp->sridx == -1) {
-	    cf->rtp_servers[cf->rtp_nsessions] = sp;
-	    sp->sridx = cf->rtp_nsessions;
-	    cf->rtp_nsessions++;
-	}
+        if (sp->sridx == -1) {
+            cf->rtp_servers[cf->rtp_nsessions] = sp;
+            sp->sridx = cf->rtp_nsessions;
+            cf->rtp_nsessions++;
+        }
     } else {
-	sp->sridx = -1;
+        sp->sridx = -1;
     }
 }

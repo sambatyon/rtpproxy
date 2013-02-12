@@ -36,8 +36,7 @@ struct proto_cap {
     const char  *pc_description;
 };
 
-struct rtpp_command
-{
+struct rtpp_command {
     char buf[1024 * 8];
     char *argv[10];
     int argc;

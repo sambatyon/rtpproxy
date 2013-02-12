@@ -37,65 +37,67 @@
 /* Linked list of free packets */
 static struct rtp_packet *rtp_packet_pool = NULL;
 
-static int 
+static int
 g723_len(unsigned char ch)
 {
 
     switch (ch & 3) {
-    case 2:
-	/* Silence Insertion Descriptor (SID) frame */
-	return 4;
+        case 2:
+            /* Silence Insertion Descriptor (SID) frame */
+            return 4;
 
-    case 0:
-	/* 6.3 kbit/s frame */
-	return 24;
+        case 0:
+            /* 6.3 kbit/s frame */
+            return 24;
 
-    case 1:
-	/* 5.3 kbit/s frame */
-	return 20;
+        case 1:
+            /* 5.3 kbit/s frame */
+            return 20;
 
-    default:
-	return RTP_NSAMPLES_UNKNOWN;
+        default:
+            return RTP_NSAMPLES_UNKNOWN;
     }
 }
 
-static int 
+static int
 g723_samples(const unsigned char *buf, int maxlen)
 {
     int pos, samples, n;
 
     for (pos = 0, samples = 0; pos < maxlen; pos += n) {
-	samples += 240;
-	n = g723_len(buf[pos]);
-	if (n == RTP_NSAMPLES_UNKNOWN)
-	    return RTP_NSAMPLES_UNKNOWN;
+        samples += 240;
+        n = g723_len(buf[pos]);
+
+        if (n == RTP_NSAMPLES_UNKNOWN)
+            return RTP_NSAMPLES_UNKNOWN;
     }
+
     return samples;
 }
 
-static int 
+static int
 rtp_calc_samples(int codec_id, size_t nbytes, const unsigned char *data)
 {
 
     switch (codec_id) {
-	case RTP_PCMU:
-	case RTP_PCMA:
-	    return nbytes;
+        case RTP_PCMU:
+        case RTP_PCMA:
+            return nbytes;
 
-	case RTP_G729:
-	    return (nbytes / 10) * 80 + (nbytes % 10 == 0 ? 0 : 80);
+        case RTP_G729:
+            return (nbytes / 10) * 80 + (nbytes % 10 == 0 ? 0 : 80);
 
-	case RTP_GSM:
-	    return 160 * (nbytes / 33);
+        case RTP_GSM:
+            return 160 * (nbytes / 33);
 
-	case RTP_G723:
-	    return g723_samples(data, nbytes);
+        case RTP_G723:
+            return g723_samples(data, nbytes);
 
-	case RTP_G722:
-	    return nbytes * 2; 
+        case RTP_G722:
+            return nbytes * 2;
 
-	default:
-	    return RTP_NSAMPLES_UNKNOWN;
+        default:
+            return RTP_NSAMPLES_UNKNOWN;
     }
 }
 
@@ -116,9 +118,10 @@ rtp_packet_chunk_find_g729(struct rtp_packet *pkt, struct rtp_packet_chunk *ret,
     samples = frames * 80;
 
     if (samples >= pkt->nsamples) {
-	ret->whole_packet_matched = 1;
-	return;
+        ret->whole_packet_matched = 1;
+        return;
     }
+
     ret->nsamples = samples;
     ret->bytes = frames * 10;
 }
@@ -132,9 +135,10 @@ rtp_packet_chunk_find_gsm(struct rtp_packet *pkt, struct rtp_packet_chunk *ret, 
     samples = frames * 160;
 
     if (samples >= pkt->nsamples) {
-	ret->whole_packet_matched = 1;
-	return;
+        ret->whole_packet_matched = 1;
+        return;
     }
+
     ret->nsamples = samples;
     ret->bytes = frames * 33;
 }
@@ -150,18 +154,21 @@ rtp_packet_chunk_find_g723(struct rtp_packet *pkt, struct rtp_packet_chunk *ret,
 
     pos = 0;
     found_samples = 0;
+
     if (samples >= pkt->nsamples) {
-	ret->whole_packet_matched = 1;
-	return;
+        ret->whole_packet_matched = 1;
+        return;
     }
 
     buf = &pkt->data.buf[pkt->data_offset];
+
     while (pos < pkt->data_size && samples > found_samples) {
-	found_samples += 240;
-	n = g723_len(buf[pos]);
-	assert(n != RTP_NSAMPLES_UNKNOWN);
-	pos += n;
+        found_samples += 240;
+        n = g723_len(buf[pos]);
+        assert(n != RTP_NSAMPLES_UNKNOWN);
+        pos += n;
     }
+
     ret->nsamples = found_samples;
     ret->bytes = (pos < pkt->data_size ? pos : pkt->data_size);
 }
@@ -174,13 +181,13 @@ rtp_packet_chunk_find_g722(struct rtp_packet *pkt, struct rtp_packet_chunk *ret,
 }
 
 
-/* 
- * Find the head of the packet with the length at least 
+/*
+ * Find the head of the packet with the length at least
  * of min_nsamples.
  *
  * Warning! When whole packet has been matched the chunk can be uninitialized.
  */
-void 
+void
 rtp_packet_first_chunk_find(struct rtp_packet *pkt, struct rtp_packet_chunk *ret, int min_nsamples)
 {
 
@@ -188,30 +195,30 @@ rtp_packet_first_chunk_find(struct rtp_packet *pkt, struct rtp_packet_chunk *ret
     ret->whole_packet_matched = 0;
 
     switch (pkt->data.header.pt) {
-    case RTP_PCMU:
-    case RTP_PCMA:
-	rtp_packet_chunk_find_g711(pkt, ret, min_nsamples);
-	break;
+        case RTP_PCMU:
+        case RTP_PCMA:
+            rtp_packet_chunk_find_g711(pkt, ret, min_nsamples);
+            break;
 
-    case RTP_G729:
-	rtp_packet_chunk_find_g729(pkt, ret, min_nsamples);
-	break;
+        case RTP_G729:
+            rtp_packet_chunk_find_g729(pkt, ret, min_nsamples);
+            break;
 
-    case RTP_GSM:
-	rtp_packet_chunk_find_gsm(pkt, ret, min_nsamples);
-	break;
+        case RTP_GSM:
+            rtp_packet_chunk_find_gsm(pkt, ret, min_nsamples);
+            break;
 
-    case RTP_G723:
-	rtp_packet_chunk_find_g723(pkt, ret, min_nsamples);
-	break;
+        case RTP_G723:
+            rtp_packet_chunk_find_g723(pkt, ret, min_nsamples);
+            break;
 
-    case RTP_G722:
-	rtp_packet_chunk_find_g722(pkt, ret, min_nsamples);
-	break;
+        case RTP_G722:
+            rtp_packet_chunk_find_g722(pkt, ret, min_nsamples);
+            break;
 
-    default:
-	ret->whole_packet_matched = 1;
-	break;
+        default:
+            ret->whole_packet_matched = 1;
+            break;
     }
 }
 
@@ -219,32 +226,32 @@ const char *
 rtp_packet_parse_errstr(rtp_parser_err_t ecode)
 {
     switch (ecode) {
-    case RTP_PARSER_OK:
-       return "no error";
+        case RTP_PARSER_OK:
+            return "no error";
 
-    case RTP_PARSER_PTOOSHRT:
-       return "packet is too short for RTP header";
+        case RTP_PARSER_PTOOSHRT:
+            return "packet is too short for RTP header";
 
-    case RTP_PARSER_IHDRVER:
-       return "incorrect RTP header version";
+        case RTP_PARSER_IHDRVER:
+            return "incorrect RTP header version";
 
-    case RTP_PARSER_PTOOSHRTXS:
-       return "packet is too short for extended RTP header size";
+        case RTP_PARSER_PTOOSHRTXS:
+            return "packet is too short for extended RTP header size";
 
-    case RTP_PARSER_PTOOSHRTXH:
-       return "packet is too short for extended RTP header";
+        case RTP_PARSER_PTOOSHRTXH:
+            return "packet is too short for extended RTP header";
 
-    case RTP_PARSER_PTOOSHRTPS:
-        return "packet is too short for RTP padding size";
+        case RTP_PARSER_PTOOSHRTPS:
+            return "packet is too short for RTP padding size";
 
-    case RTP_PARSER_PTOOSHRTP:
-       return "packet is too short for RTP padding";
+        case RTP_PARSER_PTOOSHRTP:
+            return "packet is too short for RTP padding";
 
-    case RTP_PARSER_IPS:
-       return "invalid RTP padding size";
+        case RTP_PARSER_IPS:
+            return "invalid RTP padding size";
 
-    default:
-       abort();
+        default:
+            abort();
     }
 
     /* NOTREACHED */
@@ -275,9 +282,10 @@ rtp_packet_parse(struct rtp_packet *pkt)
     if (pkt->data.header.x != 0) {
         if (pkt->size < pkt->data_offset + sizeof(*hdr_ext_ptr))
             return RTP_PARSER_PTOOSHRTXS;
+
         hdr_ext_ptr = (rtp_hdr_ext_t *)&pkt->data.buf[pkt->data_offset];
         pkt->data_offset += sizeof(rtp_hdr_ext_t) +
-          (ntohs(hdr_ext_ptr->length) * sizeof(hdr_ext_ptr->extension[0]));
+                            (ntohs(hdr_ext_ptr->length) * sizeof(hdr_ext_ptr->extension[0]));
     }
 
     if (pkt->size < pkt->data_offset)
@@ -286,7 +294,9 @@ rtp_packet_parse(struct rtp_packet *pkt)
     if (pkt->data.header.p != 0) {
         if (pkt->data_offset == pkt->size)
             return RTP_PARSER_PTOOSHRTPS;
+
         padding_size = pkt->data.buf[pkt->size - 1];
+
         if (padding_size == 0)
             return RTP_PARSER_IPS;
     }
@@ -302,26 +312,29 @@ rtp_packet_parse(struct rtp_packet *pkt)
         return RTP_PARSER_OK;
 
     pkt->nsamples = rtp_calc_samples(pkt->data.header.pt, pkt->data_size,
-      &pkt->data.buf[pkt->data_offset]);
-    /* 
-     * G.729 comfort noise frame as the last frame causes 
+                                     &pkt->data.buf[pkt->data_offset]);
+
+    /*
+     * G.729 comfort noise frame as the last frame causes
      * packet to be non-appendable
      */
     if (pkt->data.header.pt == RTP_G729 && (pkt->data_size % 10) != 0)
         pkt->appendable = 0;
+
     return RTP_PARSER_OK;
 }
 
 struct rtp_packet *
-rtp_packet_alloc()
-{
+rtp_packet_alloc() {
     struct rtp_packet *pkt;
 
     pkt = rtp_packet_pool;
+
     if (pkt != NULL)
         rtp_packet_pool = pkt->next;
     else
         pkt = malloc(sizeof(*pkt));
+
     return pkt;
 }
 
@@ -335,8 +348,7 @@ rtp_packet_free(struct rtp_packet *pkt)
 }
 
 struct rtp_packet *
-rtp_recv(int fd)
-{
+rtp_recv(int fd) {
     struct rtp_packet *pkt;
 
     pkt = rtp_packet_alloc();
@@ -345,18 +357,18 @@ rtp_recv(int fd)
         return NULL;
 
     pkt->rlen = sizeof(pkt->raddr);
-    pkt->size = recvfrom(fd, pkt->data.buf, sizeof(pkt->data.buf), 0, 
-      sstosa(&pkt->raddr), &pkt->rlen);
+    pkt->size = recvfrom(fd, pkt->data.buf, sizeof(pkt->data.buf), 0,
+                         sstosa(&pkt->raddr), &pkt->rlen);
 
     if (pkt->size == -1) {
-	rtp_packet_free(pkt);
-	return NULL;
+        rtp_packet_free(pkt);
+        return NULL;
     }
 
     return pkt;
 }
 
-void 
+void
 rtp_packet_set_seq(struct rtp_packet *p, uint16_t seq)
 {
 
@@ -364,7 +376,7 @@ rtp_packet_set_seq(struct rtp_packet *p, uint16_t seq)
     p->data.header.seq = htons(seq);
 }
 
-void 
+void
 rtp_packet_set_ts(struct rtp_packet *p, uint32_t ts)
 {
 

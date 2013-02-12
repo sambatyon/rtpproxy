@@ -54,30 +54,30 @@ typedef enum {
  */
 typedef struct {
 #if BYTE_ORDER == BIG_ENDIAN
-    unsigned int version:2;	/* protocol version */
-    unsigned int p:1;		/* padding flag */
-    unsigned int x:1;		/* header extension flag */
-    unsigned int cc:4;		/* CSRC count */
-    unsigned int m:1;		/* marker bit */
-    unsigned int pt:7;		/* payload type */
+    unsigned int version: 2; /* protocol version */
+    unsigned int p: 1;      /* padding flag */
+    unsigned int x: 1;      /* header extension flag */
+    unsigned int cc: 4;     /* CSRC count */
+    unsigned int m: 1;      /* marker bit */
+    unsigned int pt: 7;     /* payload type */
 #else
-    unsigned int cc:4;		/* CSRC count */
-    unsigned int x:1;		/* header extension flag */
-    unsigned int p:1;		/* padding flag */
-    unsigned int version:2;	/* protocol version */
-    unsigned int pt:7;		/* payload type */
-    unsigned int m:1;		/* marker bit */
+    unsigned int cc: 4;     /* CSRC count */
+    unsigned int x: 1;      /* header extension flag */
+    unsigned int p: 1;      /* padding flag */
+    unsigned int version: 2; /* protocol version */
+    unsigned int pt: 7;     /* payload type */
+    unsigned int m: 1;      /* marker bit */
 #endif
-    unsigned int seq:16;	/* sequence number */
-    uint32_t ts;		/* timestamp */
-    uint32_t ssrc;		/* synchronization source */
-    uint32_t csrc[0];		/* optional CSRC list */
+    unsigned int seq: 16;   /* sequence number */
+    uint32_t ts;        /* timestamp */
+    uint32_t ssrc;      /* synchronization source */
+    uint32_t csrc[0];       /* optional CSRC list */
 } rtp_hdr_t;
 
 typedef struct {
-    uint16_t profile;		/* defined by profile */
-    uint16_t length;		/* length of the following array in 32-byte words */
-    uint32_t extension[0];	/* actual extension data */
+    uint16_t profile;       /* defined by profile */
+    uint16_t length;        /* length of the following array in 32-byte words */
+    uint32_t extension[0];  /* actual extension data */
 } rtp_hdr_ext_t;
 
 struct rtp_packet {
@@ -105,8 +105,8 @@ struct rtp_packet {
      * utilized.
      */
     union {
-	rtp_hdr_t       header;
-	unsigned char   buf[8192];
+        rtp_hdr_t       header;
+        unsigned char   buf[8192];
     } data;
 };
 
@@ -127,7 +127,7 @@ typedef enum {
     RTP_PARSER_IPS = -7
 } rtp_parser_err_t;
 
-#define	RTP_HDR_LEN(rhp)	(sizeof(*(rhp)) + ((rhp)->cc * sizeof((rhp)->csrc[0])))
+#define RTP_HDR_LEN(rhp)    (sizeof(*(rhp)) + ((rhp)->cc * sizeof((rhp)->csrc[0])))
 
 const char *rtp_packet_parse_errstr(rtp_parser_err_t);
 rtp_parser_err_t rtp_packet_parse(struct rtp_packet *);

@@ -43,8 +43,8 @@ struct rtp_resizer {
     int         output_nsamples;
 
     struct {
-	struct rtp_packet *first;
-	struct rtp_packet *last;
+        struct rtp_packet *first;
+        struct rtp_packet *last;
     } queue;
 };
 

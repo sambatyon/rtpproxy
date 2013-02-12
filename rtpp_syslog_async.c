@@ -40,8 +40,7 @@ typedef enum {
     SYSLOG_ITEM_ASYNC_EXIT
 } item_types;
 
-struct syslog_wi
-{
+struct syslog_wi {
     item_types item_type;
     char data[SYSLOG_WI_DATA_LEN];
     int len;
@@ -73,9 +72,11 @@ syslog_queue_run(void)
 
     for (;;) {
         pthread_mutex_lock(&syslog_queue_mutex);
+
         while (syslog_wi_queue == NULL) {
             pthread_cond_wait(&syslog_queue_cond, &syslog_queue_mutex);
         }
+
         wi = syslog_wi_queue;
         syslog_wi_queue = wi->next;
         pthread_mutex_unlock(&syslog_queue_mutex);
@@ -110,9 +111,11 @@ syslog_queue_init(void)
     int i;
 
     memset(syslog_wi_pool, 0, sizeof(syslog_wi_pool));
+
     for (i = 0; i < SYSLOG_WI_POOL_SIZE - 1; i++) {
         syslog_wi_pool[i].next = &syslog_wi_pool[i + 1];
     }
+
     syslog_wi_pool[SYSLOG_WI_POOL_SIZE - 1].next = NULL;
 
     syslog_wi_free = syslog_wi_pool;
@@ -126,18 +129,18 @@ syslog_queue_init(void)
     pthread_cond_init(&syslog_wi_free_cond, NULL);
     pthread_mutex_init(&syslog_wi_free_mutex, NULL);
 
-    if (pthread_create(&syslog_queue, NULL, (void *(*)(void *))&syslog_queue_run, NULL) != 0)
+    if (pthread_create(&syslog_queue, NULL, (void * ( *)(void *))&syslog_queue_run, NULL) != 0)
         return -1;
 
     return 0;
 }
 
 static struct syslog_wi *
-syslog_queue_get_free_item(int wait)
-{
+syslog_queue_get_free_item(int wait) {
     struct syslog_wi *wi;
 
     pthread_mutex_lock(&syslog_wi_free_mutex);
+
     while (syslog_wi_free == NULL) {
         /* no free work items, return if no wait is requested */
         if (wait == 0) {
@@ -145,6 +148,7 @@ syslog_queue_get_free_item(int wait)
             pthread_mutex_unlock(&syslog_wi_free_mutex);
             return NULL;
         }
+
         pthread_cond_wait(&syslog_wi_free_cond, &syslog_wi_free_mutex);
     }
 
@@ -164,6 +168,7 @@ syslog_queue_put_item(struct syslog_wi *wi)
     pthread_mutex_lock(&syslog_queue_mutex);
 
     wi->next = NULL;
+
     if (syslog_wi_queue == NULL) {
         syslog_wi_queue = wi;
         syslog_wi_queue_tail = wi;
@@ -198,12 +203,14 @@ syslog_async_init(const char *app, int facility)
 {
 
     pthread_mutex_lock(&syslog_init_mutex);
+
     if (syslog_queue_inited == 0) {
         if (syslog_queue_init() != 0) {
             pthread_mutex_unlock(&syslog_init_mutex);
             return -1;
         }
     }
+
     syslog_queue_inited = 1;
     pthread_mutex_unlock(&syslog_init_mutex);
 
@@ -221,17 +228,20 @@ vsyslog_async(int priority, const char *format, va_list ap)
     int s1, s2;
 
     wi = syslog_queue_get_free_item(SYSLOG_WI_NOWAIT);
+
     if (wi == NULL)
         return;
 
     p = wi->data;
     s1 = sizeof(wi->data);
     s2 = vsnprintf(p, s1, format, ap);
+
     if (s2 >= s1) {
         /* message was truncated */
         s2 = s1 - 1;
         p[s2] = '\0';
     }
+
     wi->len = s2;
     wi->priority = priority;
     wi->item_type = SYSLOG_ITEM_ASYNC_WRITE;

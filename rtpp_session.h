@@ -49,8 +49,8 @@ struct rtpp_session {
     char *call_id;
     char *tag;
     rtpp_log_t log;
-    struct rtpp_session* rtcp;
-    struct rtpp_session* rtp;
+    struct rtpp_session *rtcp;
+    struct rtpp_session *rtp;
     /* Remote source addresses, one for caller and one for callee */
     struct sockaddr *addr[2];
     /* Save previous address when doing update */

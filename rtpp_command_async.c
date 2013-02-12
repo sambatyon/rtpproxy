@@ -49,20 +49,24 @@ process_commands(struct cfg *cf, int controlfd_in, double dtime)
         if (cf->stable.umode == 0) {
             rlen = sizeof(ifsun);
             controlfd = accept(controlfd_in, sstosa(&ifsun), &rlen);
+
             if (controlfd == -1) {
                 if (errno != EWOULDBLOCK)
                     rtpp_log_ewrite(RTPP_LOG_ERR, cf->stable.glog,
-                      "can't accept connection on control socket");
+                                    "can't accept connection on control socket");
+
                 break;
             }
         } else {
             controlfd = controlfd_in;
         }
+
         if (get_command(&cf->stable, controlfd, &cmd) > 0) {
             pthread_mutex_lock(&cf->glock);
             i = handle_command(cf, controlfd, &cmd, dtime);
             pthread_mutex_unlock(&cf->glock);
         }
+
         if (cf->stable.umode == 0) {
             close(controlfd);
         }
@@ -85,9 +89,12 @@ rtpp_cmd_queue_run(void *arg)
 
     for (;;) {
         i = poll(pfds, 1, INFTIM);
+
         if (i < 0 && errno == EINTR)
             continue;
+
         eptime = getdtime();
+
         if (i > 0 && (pfds[0].revents & POLLIN) != 0) {
             process_commands(cf, pfds[0].fd, eptime);
         }
@@ -98,7 +105,7 @@ int
 rtpp_command_async_init(struct cfg *cf)
 {
 
-    if (pthread_create(&rtpp_cmd_queue, NULL, (void *(*)(void *))&rtpp_cmd_queue_run, cf) != 0)
+    if (pthread_create(&rtpp_cmd_queue, NULL, (void * ( *)(void *))&rtpp_cmd_queue_run, cf) != 0)
         return -1;
 
     return 0;

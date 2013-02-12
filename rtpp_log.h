@@ -32,28 +32,28 @@
 #include <syslog.h>
 #include <stdarg.h>
 
-#define	rtpp_log_t	struct cfg_stable *
+#define rtpp_log_t  struct cfg_stable *
 
 #include "rtpp_defines.h"
 
-#define	RTPP_LOG_DBUG	LOG_DEBUG
-#define	RTPP_LOG_INFO	LOG_INFO
-#define	RTPP_LOG_WARN	LOG_WARNING
-#define	RTPP_LOG_ERR	LOG_ERR
-#define	RTPP_LOG_CRIT	LOG_CRIT
+#define RTPP_LOG_DBUG   LOG_DEBUG
+#define RTPP_LOG_INFO   LOG_INFO
+#define RTPP_LOG_WARN   LOG_WARNING
+#define RTPP_LOG_ERR    LOG_ERR
+#define RTPP_LOG_CRIT   LOG_CRIT
 
-#define	rtpp_log_open(cf, app, call_id, flag) _rtpp_log_open(cf, app);
-#define	rtpp_log_write(level, handle, format, args...)			\
-	if (level <= handle->log_level) {				\
-		_rtpp_log_write(handle, level, __FUNCTION__, format,	\
-		    ## args);						\
-	};
-#define	rtpp_log_ewrite(level, handle, format, args...)			\
-	if (level <= handle->log_level) {				\
-		_rtpp_log_ewrite(handle, level, __FUNCTION__, format,	\
-		    ## args);						\
-	};
-#define	rtpp_log_close(handle) _rtpp_log_close();
+#define rtpp_log_open(cf, app, call_id, flag) _rtpp_log_open(cf, app);
+#define rtpp_log_write(level, handle, format, args...)          \
+    if (level <= handle->log_level) {               \
+        _rtpp_log_write(handle, level, __FUNCTION__, format,    \
+                        ## args);                       \
+    };
+#define rtpp_log_ewrite(level, handle, format, args...)         \
+    if (level <= handle->log_level) {               \
+        _rtpp_log_ewrite(handle, level, __FUNCTION__, format,   \
+                         ## args);                       \
+    };
+#define rtpp_log_close(handle) _rtpp_log_close();
 
 struct cfg_stable;
 

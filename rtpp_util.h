@@ -42,10 +42,10 @@
 
 #include "rtpp_defines.h"
 
-#define	GET_RTP(sp)	(((sp)->rtp != NULL) ? (sp)->rtp : (sp))
-#define	NOT(x)		(((x) == 0) ? 1 : 0)
-#define	MIN(x, y)	(((x) > (y)) ? (y) : (x))
-#define	MAX(x, y)	(((x) > (y)) ? (x) : (y))
+#define GET_RTP(sp) (((sp)->rtp != NULL) ? (sp)->rtp : (sp))
+#define NOT(x)      (((x) == 0) ? 1 : 0)
+#define MIN(x, y)   (((x) > (y)) ? (y) : (x))
+#define MAX(x, y)   (((x) > (y)) ? (x) : (y))
 
 /* Function prototypes */
 double getdtime(void);
@@ -60,25 +60,25 @@ int pthread_mutex_islocked(pthread_mutex_t *);
 
 /* Some handy/compat macros */
 #if !defined(INFTIM)
-#define	INFTIM		(-1)
+#define INFTIM      (-1)
 #endif
 
 #if !defined(ACCESSPERMS)
-#define	ACCESSPERMS	(S_IRWXU|S_IRWXG|S_IRWXO)
+#define ACCESSPERMS (S_IRWXU|S_IRWXG|S_IRWXO)
 #endif
 #if !defined(DEFFILEMODE)
-#define	DEFFILEMODE	(S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
+#define DEFFILEMODE (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
 #endif
 
 #if !defined(HAVE_ERR_H)
 #define err(exitcode, format, args...) \
-  errx(exitcode, format ": %s", ## args, strerror(errno))
+    errx(exitcode, format ": %s", ## args, strerror(errno))
 #define errx(exitcode, format, args...) \
-  { warnx(format, ## args); exit(exitcode); }
+    { warnx(format, ## args); exit(exitcode); }
 #define warn(format, args...) \
-  warnx(format ": %s", ## args, strerror(errno))
+    warnx(format ": %s", ## args, strerror(errno))
 #define warnx(format, args...) \
-  fprintf(stderr, format "\n", ## args)
+    fprintf(stderr, format "\n", ## args)
 #endif
 
 #endif

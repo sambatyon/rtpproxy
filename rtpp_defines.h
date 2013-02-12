@@ -47,32 +47,32 @@
  * Version of the command protocol, bump only when backward-incompatible
  * change is introduced
  */
-#define	CPROTOVER	20040107
+#define CPROTOVER   20040107
 
-#define	PORT_MIN	35000
-#define	PORT_MAX	65000
-#define	TIMETICK	1.0	/* in seconds */
-#define	SESSION_TIMEOUT	60	/* in ticks */
-#define	TOS		0xb8
-#define	LBR_THRS	128	/* low-bitrate threshold */
-#define	CPORT		"22222"
-#define	POLL_LIMIT	200	/* maximum number of poll(2) calls per second */
-#define	UPDATE_WINDOW	10.0	/* in seconds */
+#define PORT_MIN    35000
+#define PORT_MAX    65000
+#define TIMETICK    1.0 /* in seconds */
+#define SESSION_TIMEOUT 60  /* in ticks */
+#define TOS     0xb8
+#define LBR_THRS    128 /* low-bitrate threshold */
+#define CPORT       "22222"
+#define POLL_LIMIT  200 /* maximum number of poll(2) calls per second */
+#define UPDATE_WINDOW   10.0    /* in seconds */
 
 /* Dummy service, getaddrinfo needs it */
-#define	SERVICE		"34999"
+#define SERVICE     "34999"
 
-#define	CMD_SOCK	"/var/run/rtpproxy.sock"
-#define	PID_FILE	"/var/run/rtpproxy.pid"
+#define CMD_SOCK    "/var/run/rtpproxy.sock"
+#define PID_FILE    "/var/run/rtpproxy.pid"
 
 /*
  * TTL counters are used to detect the absence of audio packets
  * in either direction.  When the counter reaches 0, the call timeout
  * occurs.
- */ 
+ */
 typedef enum {
-    TTL_UNIFIED = 0,		/* all TTL counters must reach 0 */
-    TTL_INDEPENDENT = 1		/* any TTL counter reaches 0 */
+    TTL_UNIFIED = 0,        /* all TTL counters must reach 0 */
+    TTL_INDEPENDENT = 1     /* any TTL counter reaches 0 */
 } rtpp_ttl_mode;
 
 struct bindaddr_list {
@@ -84,25 +84,25 @@ struct cfg {
     struct cfg_stable {
         int nodaemon;
         int dmode;
-        int bmode;			/* Bridge mode */
-        int umode;			/* UDP control mode */
-        int port_min;		/* Lowest UDP port for RTP */
-        int port_max;		/* Highest UDP port number for RTP */
+        int bmode;          /* Bridge mode */
+        int umode;          /* UDP control mode */
+        int port_min;       /* Lowest UDP port for RTP */
+        int port_max;       /* Highest UDP port number for RTP */
         int max_ttl;
         /*
          * The first address is for external interface, the second one - for
          * internal one. Second can be NULL, in this case there is no bridge
          * mode enabled.
          */
-        struct sockaddr *bindaddr[2];	/* RTP socket(s) addresses */
+        struct sockaddr *bindaddr[2];   /* RTP socket(s) addresses */
         int tos;
 
         const char *rdir;
         const char *sdir;
-        int record_pcap;		/* Record in the PCAP format? */
-        int record_all;		/* Record everything */
+        int record_pcap;        /* Record in the PCAP format? */
+        int record_all;     /* Record everything */
 
-        int rrtcp;			/* Whether or not to relay RTCP? */
+        int rrtcp;          /* Whether or not to relay RTCP? */
         rtpp_log_t glog;
 
         struct rlimit nofile_limit;

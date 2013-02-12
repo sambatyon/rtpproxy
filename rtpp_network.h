@@ -38,7 +38,7 @@
 
 #include "rtpp_defines.h"
 
-#define	addr2port(sa)	ntohs(satosin(sa)->sin_port)
+#define addr2port(sa)   ntohs(satosin(sa)->sin_port)
 
 /* Function prototypes */
 int ishostseq(struct sockaddr *, struct sockaddr *);
@@ -73,36 +73,36 @@ union sockaddr_in_s {
 
 /* Some handy/compat macros */
 #if !defined(AF_LOCAL)
-#define	AF_LOCAL	AF_UNIX
+#define AF_LOCAL    AF_UNIX
 #endif
 #if !defined(PF_LOCAL)
-#define	PF_LOCAL	PF_UNIX
+#define PF_LOCAL    PF_UNIX
 #endif
 
 #if !defined(SA_LEN)
 #define SA_LEN(sa) \
-  (((sa)->sa_family == AF_INET) ? \
-  sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
+    (((sa)->sa_family == AF_INET) ? \
+     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
 #endif
 #if !defined(SS_LEN)
 #define SS_LEN(ss) \
-  (((ss)->ss_family == AF_INET) ? \
-  sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
+    (((ss)->ss_family == AF_INET) ? \
+     sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6))
 #endif
 
 #if !defined(satosin)
-#define	satosin(sa)	((struct sockaddr_in *)(sa))
+#define satosin(sa) ((struct sockaddr_in *)(sa))
 #endif
 #if !defined(satosin6)
-#define	satosin6(sa)	((struct sockaddr_in6 *)(sa))
+#define satosin6(sa)    ((struct sockaddr_in6 *)(sa))
 #endif
 #if !defined(sstosa)
-#define	sstosa(ss)	((struct sockaddr *)(ss))
+#define sstosa(ss)  ((struct sockaddr *)(ss))
 #endif
 #if !defined(satoss)
-#define	satoss(sa)	((struct sockaddr_storage *)(sa))
+#define satoss(sa)  ((struct sockaddr_storage *)(sa))
 #endif
 
-#define	IS_VALID_PORT(p)	((p) > 0 && (p) < 65536)
+#define IS_VALID_PORT(p)    ((p) > 0 && (p) < 65536)
 
 #endif

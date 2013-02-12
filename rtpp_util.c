@@ -47,7 +47,7 @@ getdtime(void)
     struct timeval timev;
 
     if (gettimeofday(&timev, NULL) == -1)
-	return -1;
+        return -1;
 
     return timev.tv_sec + ((double)timev.tv_usec) / 1000000.0;
 }
@@ -57,7 +57,7 @@ dtime2ts(double dtime, uint32_t *ts_sec, uint32_t *ts_usec)
 {
 
     *ts_sec = trunc(dtime);
-    *ts_usec = round(1000000.0 * (dtime - ((double)*ts_sec)));
+    *ts_usec = round(1000000.0 * (dtime - ((double) * ts_sec)));
 }
 
 void
@@ -68,9 +68,10 @@ seedrandom(void)
     struct timeval tv;
 
     fd = open("/dev/random", O_RDONLY, 0);
+
     if (fd >= 0) {
-	read(fd, &junk, sizeof(junk));
-	close(fd);
+        read(fd, &junk, sizeof(junk));
+        close(fd);
     }
 
     gettimeofday(&tv, NULL);
@@ -82,17 +83,20 @@ drop_privileges(struct cfg *cf)
 {
 
     if (cf->stable.run_gname != NULL) {
-	if (setgid(cf->stable.run_gid) != 0) {
-	    rtpp_log_ewrite(RTPP_LOG_ERR, cf->stable.glog, "can't set current group ID: %d", cf->stable.run_gid);
-	    return -1;
-	}
+        if (setgid(cf->stable.run_gid) != 0) {
+            rtpp_log_ewrite(RTPP_LOG_ERR, cf->stable.glog, "can't set current group ID: %d", cf->stable.run_gid);
+            return -1;
+        }
     }
+
     if (cf->stable.run_uname == NULL)
-	return 0;
+        return 0;
+
     if (setuid(cf->stable.run_uid) != 0) {
-	rtpp_log_ewrite(RTPP_LOG_ERR, cf->stable.glog, "can't set current user ID: %d", cf->stable.run_uid);
-	return -1;
+        rtpp_log_ewrite(RTPP_LOG_ERR, cf->stable.glog, "can't set current user ID: %d", cf->stable.run_uid);
+        return -1;
     }
+
     return 0;
 }
 
@@ -105,18 +109,22 @@ init_port_table(struct cfg *cf)
     /* Generate linear table */
     cf->stable.port_table_len = ((cf->stable.port_max - cf->stable.port_min) / 2) + 1;
     portnum = cf->stable.port_min;
+
     for (i = 0; i < cf->stable.port_table_len; i += 1) {
-	cf->stable.port_table[i] = portnum;
-	portnum += 2;
+        cf->stable.port_table[i] = portnum;
+        portnum += 2;
     }
+
 #if !defined(SEQUENTAL_PORTS)
+
     /* Shuffle elements ramdomly */
     for (i = 0; i < cf->stable.port_table_len; i += 1) {
-	j = random() % cf->stable.port_table_len;
-	portnum = cf->stable.port_table[i];
-	cf->stable.port_table[i] = cf->stable.port_table[j];
-	cf->stable.port_table[j] = portnum;
+        j = random() % cf->stable.port_table_len;
+        portnum = cf->stable.port_table[i];
+        cf->stable.port_table[i] = cf->stable.port_table[j];
+        cf->stable.port_table[j] = portnum;
     }
+
 #endif
     /* Set the last used element to be the last element */
     cf->port_table_idx = cf->stable.port_table_len - 1;
@@ -137,21 +145,25 @@ rtpp_strsep(char **stringp, const char *delim)
     char *tok;
 
     if ((s = *stringp) == NULL)
-	return (NULL);
+        return (NULL);
+
     for (tok = s;;) {
-	c = *s++;
-	spanp = delim;
-	do {
-	    if ((sc = *spanp++) == c) {
-		if (c == 0)
-		    s = NULL;
-		else
-		    s[-1] = 0;
-		*stringp = s;
-		return (tok);
-	    }
-	} while (sc != 0);
+        c = *s++;
+        spanp = delim;
+
+        do {
+            if ((sc = *spanp++) == c) {
+                if (c == 0)
+                    s = NULL;
+                else
+                    s[-1] = 0;
+
+                *stringp = s;
+                return (tok);
+            }
+        } while (sc != 0);
     }
+
     /* NOTREACHED */
 }
 
@@ -177,16 +189,19 @@ rtpp_daemon(int nochdir, int noclose)
     osa_ok = sigaction(SIGHUP, &sa, &osa);
 
     switch (fork()) {
-    case -1:
-        return (-1);
-    case 0:
-        break;
-    default:
-        _exit(0);
+        case -1:
+            return (-1);
+
+        case 0:
+            break;
+
+        default:
+            _exit(0);
     }
 
     newgrp = setsid();
     oerrno = errno;
+
     if (osa_ok != -1)
         sigaction(SIGHUP, &osa, NULL);
 
@@ -202,9 +217,11 @@ rtpp_daemon(int nochdir, int noclose)
         (void)dup2(fd, STDIN_FILENO);
         (void)dup2(fd, STDOUT_FILENO);
         (void)dup2(fd, STDERR_FILENO);
+
         if (fd > 2)
             (void)close(fd);
     }
+
     return (0);
 }
 
@@ -212,7 +229,7 @@ static int8_t hex2char[128] = {
     -1,  -1,  -1,  -1,  -1,  -1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1,  -1,  -1,  -1,  -1,  -1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1,  -1,  -1,  -1,  -1,  -1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-     0,   1,   2,   3,   4,   5,   6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
+    0,   1,   2,   3,   4,   5,   6,  7,  8,  9, -1, -1, -1, -1, -1, -1,
     -1, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1,  -1,  -1,  -1,  -1,  -1,  -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -226,22 +243,30 @@ url_unquote(uint8_t *buf, int len)
     uint8_t *cp;
 
     outlen = len;
+
     while (len > 0) {
         cp = memchr(buf, '%', len);
+
         if (cp == NULL)
             return (outlen);
+
         if (cp - buf + 2 > len)
             return (-1);
+
         if (cp[1] > 127 || cp[2] > 127 ||
-          hex2char[cp[1]] == -1 || hex2char[cp[2]] == -1)
+                hex2char[cp[1]] == -1 || hex2char[cp[2]] == -1)
             return (-1);
+
         cp[0] = (hex2char[cp[1]] << 4) | hex2char[cp[2]];
         len -= cp - buf + 3;
+
         if (len > 0)
             memmove(cp + 1, cp + 3, len);
+
         buf = cp + 1;
         outlen -= 2;
     }
+
     return (outlen);
 }
 
@@ -251,11 +276,14 @@ pthread_mutex_islocked(pthread_mutex_t *mutex)
     int rval;
 
     rval = pthread_mutex_trylock(mutex);
+
     if (rval != 0) {
         if (rval == EBUSY)
             return (1);
+
         return (-1);
     }
+
     pthread_mutex_unlock(mutex);
     return (0);
 }

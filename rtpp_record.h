@@ -40,10 +40,10 @@
 #include "rtp.h"
 #include "rtpp_network.h"
 
-#define	DLT_NULL	0
-#define	PCAP_MAGIC	0xa1b2c3d4
-#define	PCAP_VER_MAJR	2
-#define	PCAP_VER_MINR	4
+#define DLT_NULL    0
+#define PCAP_MAGIC  0xa1b2c3d4
+#define PCAP_VER_MAJR   2
+#define PCAP_VER_MINR   4
 
 struct rtpp_session;
 
@@ -83,8 +83,8 @@ struct pkt_hdr_pcap {
 
 struct pkt_hdr_adhoc {
     union sockaddr_in_s addr;   /* Source address */
-    double time;		/* Time of arrival */
-    unsigned short plen;	/* Length of following RTP/RTCP packet */
+    double time;        /* Time of arrival */
+    unsigned short plen;    /* Length of following RTP/RTCP packet */
 };
 
 #endif
